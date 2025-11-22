@@ -1,0 +1,22 @@
+// src/config/tags.js
+export const TAGS = [
+  "GIRLS_ONLY",
+  "FOR_STUDENTS",
+  "FOR_WORKERS",
+  "FAMILY",
+  "SHORT_TERM",
+  "LONG_TERM",
+  "PET_FRIENDLY",
+  "FURNISHED",
+  "WIFI",
+  "FEE_INCLUDED",
+  "FOR_STUDY",
+  "BOYS_ONLY",
+  "12MONTHS_MINIMUM",
+  "6MONTHS_MINIMUM",
+  "3MONTHS_MINIMUM",
+  "2MONTHS_MINIMUM",
+  "1MONTH_MINIMUM",
+  "NEAR_METRO",
+  "NEAR_BUS_STOP",
+];

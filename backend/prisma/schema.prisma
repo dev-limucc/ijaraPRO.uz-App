@@ -1,0 +1,129 @@
+datasource db {
+  provider = "postgresql"
+  url      = "postgresql://postgres:1234@localhost:5434/rentaldb"
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id         Int     @id @default(autoincrement())
+  telegramId String  @unique
+  name       String?
+  username   String?
+
+  phoneNumber String?
+
+  lastLocationLat Float?
+  lastLocationLng Float?
+
+  lastRegionName String? // "Tashkent", "Fergana"
+  lastCityName   String? // "Chilonzor", "Margilan"
+
+  isActive     Boolean       @default(false)
+  lastSeenAt   DateTime?
+  createdAt    DateTime      @default(now())
+  language     Language      @default(UZ)
+  currency     Currency      @default(UZS)
+  listings     Listing[]
+  listingLikes ListingLike[]
+  requestLikes RequestLike[]
+}
+
+enum ListingType {
+  APARTMENT
+  HOUSE
+  OFFICE
+  MARKET
+  SCHOOL
+  OTHER
+}
+
+enum Language {
+  UZ
+  RU
+  EN
+}
+
+enum Currency {
+  UZS
+  USD
+  EUR
+}
+
+model Tag {
+  id     Int     @id @default(autoincrement())
+  key    String  @unique // "GIRLS_ONLY", must be unique
+  active Boolean @default(true) // admin can disable tags
+}
+
+model Listing {
+  id   Int         @id @default(autoincrement())
+  name String
+  type ListingType
+
+  rooms  Int?
+  floor  Int?
+  sizeM2 Int?
+
+  isPetAllowed Boolean @default(false)
+
+  price        Int
+  currency     Currency // what lister chose: UZS / USD / EUR
+  capacity     Int?
+  peopleNeeded Int?
+
+  latitude  Float
+  longitude Float
+  address   String?
+
+  images String[] @default([])
+  videos String[] @default([])
+  tags   String[] @default([]) // ["GIRLS_ONLY", "FOR_STUDENTS"]
+
+  description String? @db.VarChar(500)
+
+  classroomsCount  Int? // for SCHOOL
+  officeRoomsCount Int? // for OFFICE
+
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+
+  ownerId Int
+  owner   User @relation(fields: [ownerId], references: [id])
+
+  likes ListingLike[] // people who liked this listing
+}
+model ListingLike {
+  userId    Int
+  listingId Int
+  createdAt DateTime @default(now())
+
+  user      User    @relation(fields: [userId], references: [id])
+  listing   Listing @relation(fields: [listingId], references: [id])
+
+  @@id([userId, listingId]) // user can like a listing only once
+}
+model Request {
+  id        Int      @id @default(autoincrement())
+  title     String // "Need 2-room in Chilonzor"
+  minPrice  Int?
+  maxPrice  Int?
+  rooms     Int?
+  region    String? // "Chilonzor", "Yunusabad"
+  createdAt DateTime @default(now())
+
+  likes RequestLike[]
+}
+
+model RequestLike {
+  userId    Int
+  requestId Int
+  createdAt DateTime @default(now())
+
+  user    User    @relation(fields: [userId], references: [id])
+  request Request @relation(fields: [requestId], references: [id])
+
+  @@id([userId, requestId]) // 1 user likes a request only once
+}
