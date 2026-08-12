@@ -1,0 +1,116 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id                String   @id @default(cuid())
+  telegramId        String   @unique
+  name              String?
+  username          String?
+  phone             String?
+  preferredCurrency String   @default("UZS")
+  preferredLang     String   @default("uz")
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  listings          Listing[]
+  requests          Request[]
+  favorites         Favorite[]
+  requestLikes      RequestLike[]
+  requestWatches    RequestWatch[]
+  notifications     Notification[]
+
+  @@map("users")
+}
+
+model Listing {
+  id          String   @id @default(cuid())
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId      String
+  title       String
+  description String?
+  price       Int
+  currency    String   @default("USD")
+  city        String?
+  address     String?
+  latitude    Float?
+  longitude   Float?
+  images      Json?
+  views       Int      @default(0)
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  favorites   Favorite[]
+
+  @@map("listings")
+}
+
+model Request {
+  id           String   @id @default(cuid())
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId       String
+  budget       Int
+  currency     String   @default("USD")
+  city         String?
+  location     String?
+  propertyType String?
+  note         String?
+  likes        RequestLike[]
+  watchers     RequestWatch[]
+  createdAt    DateTime @default(now())
+
+  @@map("requests")
+}
+
+model Favorite {
+  id        String   @id @default(cuid())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId    String
+  listing   Listing  @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  listingId String
+  createdAt DateTime @default(now())
+
+  @@unique([userId, listingId])
+  @@map("favorites")
+}
+
+model RequestLike {
+  id        String   @id @default(cuid())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId    String
+  request   Request  @relation(fields: [requestId], references: [id], onDelete: Cascade)
+  requestId String
+  createdAt DateTime @default(now())
+
+  @@unique([userId, requestId])
+  @@map("request_likes")
+}
+
+model RequestWatch {
+  id        String   @id @default(cuid())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId    String
+  request   Request  @relation(fields: [requestId], references: [id], onDelete: Cascade)
+  requestId String
+  createdAt DateTime @default(now())
+
+  @@unique([userId, requestId])
+  @@map("request_watches")
+}
+
+model Notification {
+  id        String   @id @default(cuid())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId    String
+  title     String
+  body      String?
+  isRead    Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  @@map("notifications")
+}
+
