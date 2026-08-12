@@ -1,0 +1,51 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model AppUser {
+  id        String   @id @default(cuid())
+  telegramId String  @unique
+  username  String?
+  firstName String?
+  lastName  String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Listing {
+  id          String        @id @default(cuid())
+  title       String
+  price       Int
+  currency    String        @default("UZS")
+  area        Int?          // in m²
+  rooms       Int?
+  maxPeople   Int?
+  category    String
+  tags        String[]
+  description String?
+  address     String?
+  name        String
+  phoneNumber String
+  lat         Decimal       @db.Decimal(9, 6)
+  lng         Decimal       @db.Decimal(9, 6)
+  images      ListingImage[]
+  createdAt   DateTime      @default(now())
+}
+
+model ListingImage {
+  id        String   @id @default(cuid())
+  url       String
+  listingId String
+  listing   Listing  @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  
+  @@index([listingId])
+}
+
